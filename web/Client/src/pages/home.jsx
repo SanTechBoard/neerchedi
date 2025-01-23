@@ -1,5 +1,4 @@
 import { ThemeToggle } from '../components/themetoggle';
-import Nav from '../components/nav';
 import Dashboard from '../components/dashboard';
 
 function Home() {

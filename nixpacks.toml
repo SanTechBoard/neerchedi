@@ -5,14 +5,17 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["npm ci --production=false"]
 
 [phases.build]
 cmds = ["npm run build"]
 
 [start]
-cmd = "npm run preview"
+cmd = "npm run preview -- --host 0.0.0.0 --port $PORT"
 
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+HOST = "0.0.0.0"
+VITE_FBRTDBAPI = "${VITE_FBRTDBAPI}"
+VITE_FBRTDBURL = "${VITE_FBRTDBURL}"

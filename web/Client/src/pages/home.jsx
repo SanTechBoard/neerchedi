@@ -5,7 +5,7 @@ function Home() {
   return (
     <>
       <ThemeToggle />
-      <div className="max-w-4xl mx-auto px-4 mb-10">
+      <div className="max-w-4xl mx-auto px-4 mb-12">
         <h1>Home test</h1>
         <Dashboard />
       </div>

@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+body{
+  overflow-y: hidden;
+}
+
 h1 {
-  @apply text-6xl font-bold mb-6 mt-6 text-center;
+  @apply text-6xl font-bold mb-6 mt-1 text-center;
 }
 
 h2 {

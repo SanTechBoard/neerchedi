@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Draggable from 'react-draggable';
+import { ResizableBox } from 'react-resizable';
+// Import the CSS directly from node_modules
+import 'react-resizable/css/styles.css';
 import Dashboard from '../components/dashboard';
 import '../styles/admin.css';
 
@@ -6,6 +10,9 @@ function Admin() {
   const [isOpen, setIsOpen] = useState(true);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [activeTooltip, setActiveTooltip] = useState('');
+  const [activeWindow, setActiveWindow] = useState(null);
+  const nodeRef = useRef(null);
+  const dragBounds = useRef(null);
 
   const handleMouseMove = (e, text) => {
     setTooltipPosition({ x: e.clientX, y: e.clientY });
@@ -16,8 +23,74 @@ function Admin() {
     setActiveTooltip('');
   };
 
+  const handleClick = (e, component) => {
+    e.preventDefault();
+    setActiveWindow(component);
+  };
+
+  const renderWindowContent = (title, content) => (
+    <div className="window-container">
+      <div className="window-header">
+        <h2>{title}</h2>
+        <button onClick={() => setActiveWindow(null)}>×</button>
+      </div>
+      <div className="window-content">
+        {content}
+      </div>
+    </div>
+  );
+
+  const renderWindow = () => {
+    switch(activeWindow) {
+      case 'automation':
+        return (
+          <Draggable 
+            handle=".window-header" 
+            nodeRef={nodeRef}
+            defaultPosition={{x: 100, y: 100}}
+            bounds=".windows-container"
+          >
+            <div ref={nodeRef} style={{ position: 'absolute', height: 'auto' }}>
+              <ResizableBox
+                className="component-window"
+                width={400}
+                height={300}
+                minConstraints={[300, 200]}
+                maxConstraints={[1000, 800]}
+              >
+                {renderWindowContent('Automation', <h3>Automation Content</h3>)}
+              </ResizableBox>
+            </div>
+          </Draggable>
+        );
+      case 'settings':
+        return (
+          <Draggable 
+            handle=".window-header" 
+            nodeRef={nodeRef}
+            defaultPosition={{x: 100, y: 100}}
+            bounds=".windows-container"
+          >
+            <div ref={nodeRef} style={{ position: 'absolute', height: 'auto' }}>
+              <ResizableBox
+                className="component-window"
+                width={400}
+                height={300}
+                minConstraints={[300, 200]}
+                maxConstraints={[1000, 800]}
+              >
+                {renderWindowContent('Settings', <h3>Settings Content</h3>)}
+              </ResizableBox>
+            </div>
+          </Draggable>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="p-6">
+    <div className="admin-container" ref={dragBounds}>
       <h1 className="text-3xl font-bold mb-6">Admin</h1>
       <div>
         <div className="flex items-center w-80">
@@ -46,28 +119,33 @@ function Admin() {
           <li>
             <a 
               href="/automation" 
-              className="hover:text-blue-500 transition-colors"
+              className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
               onMouseMove={(e) => handleMouseMove(e, 'Automation')}
               onMouseLeave={handleMouseLeave}
+              onClick={(e) => handleClick(e, 'automation')}
             >A</a>
           </li>
           <li>
-            <a 
+            <a
               href="/settings" 
-              className="hover:text-blue-500 transition-colors"
+              className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
               onMouseMove={(e) => handleMouseMove(e, 'Settings')}
               onMouseLeave={handleMouseLeave}
+              onClick={(e) => handleClick(e, 'settings')}
             >S</a>
           </li>
           <li>
             <a 
               href="/logout" 
-              className="hover:text-blue-500 transition-colors"
+              className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
               onMouseMove={(e) => handleMouseMove(e, 'Logout')}
               onMouseLeave={handleMouseLeave}
             >L</a>
           </li>
         </ul>
+      </div>
+      <div className="windows-container">
+        {activeWindow && renderWindow()}
       </div>
       {activeTooltip && (
         <div 

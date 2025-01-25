@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../firebase';
 import { useTheme } from './themecontext';
-import './styles/dashboard.css';
 
-function Dashboard() {
+function Dashboard({ isMinimized = false }) {
   const { isDark } = useTheme();
   const [hydroData, setHydroData] = useState({
     bloom_time: 0,
@@ -38,57 +37,61 @@ function Dashboard() {
     });
   }, []);
 
-  const cardClasses = `${
+  const cardClass = `${
     isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-  } p-6 rounded-lg shadow-lg transition-all duration-300 cardClass`;
+  } p-4 rounded-lg shadow-lg transition-all duration-300`;
+
+  const titleClass = `font-semibold mb-2 ${isMinimized ? 'text-lg' : 'text-xl'}`;
+  const valueClass = `font-bold ${isMinimized ? 'text-2xl' : 'text-4xl'}`;
+  const sectionClass = `text-2xl font-semibold mb-4 ${isMinimized ? 'text-xl' : 'text-2xl'}`;
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <div className={`p-4 ${isMinimized ? 'scale-95' : ''}`}>
+      <h1 className={`font-bold mb-6 ${isMinimized ? 'text-2xl' : 'text-3xl'}`}>Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Hydroponics Section */}
         <div>
-          <h2 className="text-2xl font-semibold mb-4">Hydroponics</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Bloom Time</h3>
-              <p className="text-4xl font-bold text-pink-400">{hydroData.bloom_time/1000} s</p>
+          <h2 className={sectionClass}>Hydroponics</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={cardClass}>
+              <h3 className={titleClass}>Bloom Time</h3>
+              <p className={`${valueClass} text-purple-600`}>{hydroData.bloom_time/1000} s</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Greens Time</h3>
-              <p className="text-4xl font-bold text-green-600">{hydroData.greens_time/1000} s</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>Greens Time</h3>
+              <p className={`${valueClass} text-green-600`}>{hydroData.greens_time/1000} s</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Nutes Time</h3>
-              <p className="text-4xl font-bold text-red-600">{hydroData.nutes_time/1000} s</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>Nutes Time</h3>
+              <p className={`${valueClass} text-blue-600`}>{hydroData.nutes_time/1000} s</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">pH</h3>
-              <p className="text-4xl font-bold text-blue-600">{hydroData.ph}</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>pH</h3>
+              <p className={`${valueClass} text-blue-600`}>{hydroData.ph}</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">State</h3>
-              <p className="text-4xl font-bold text-blue-600">{hydroData.state}</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>State</h3>
+              <p className={`${valueClass} text-blue-600`}>{hydroData.state}</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Updating</h3>
-              <p className="text-4xl font-bold text-blue-600">{String(hydroData.updating)}</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>Updating</h3>
+              <p className={`${valueClass} text-blue-600`}>{String(hydroData.updating)}</p>
             </div>
           </div>
         </div>
 
         {/* Time Section */}
         <div>
-          <h2 className="text-2xl font-semibold mb-4">Time</h2>
-          <div className="grid grid-cols-1 gap-4">
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Current Epoch</h3>
-              <p className="text-4xl font-bold text-yellow-400">{timeData.currentEpoch}</p>
+          <h2 className={sectionClass}>Time</h2>
+          <div className="grid grid-cols-1 gap-3">
+            <div className={cardClass}>
+              <h3 className={titleClass}>Current Epoch</h3>
+              <p className={`${valueClass} text-blue-600`}>{timeData.currentEpoch}</p>
             </div>
-            <div className={cardClasses}>
-              <h3 className="text-xl font-semibold mb-2">Last Updated Epoch</h3>
-              <p className="text-4xl font-bold text-orange-500">{timeData.lastUpdatedEpoch}</p>
+            <div className={cardClass}>
+              <h3 className={titleClass}>Last Updated Epoch</h3>
+              <p className={`${valueClass} text-orange-500`}>{timeData.lastUpdatedEpoch}</p>
             </div>
           </div>
         </div>

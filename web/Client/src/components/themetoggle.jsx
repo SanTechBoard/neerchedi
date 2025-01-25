@@ -5,7 +5,7 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="fixed top-4 right-4 p-2 rounded-lg text-4xl"
+      className="fixed top-4 right-4 p-2 rounded-lg text-4xl z-10"
       onClick={toggleTheme}
     >
       {isDark ? '☀️' : '🌙'}

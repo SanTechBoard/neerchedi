@@ -35,4 +35,8 @@ export default [
       ],
     },
   },
+<<<<<<< HEAD
 ]
+=======
+]
+>>>>>>> origin/master

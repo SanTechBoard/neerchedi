@@ -7,7 +7,11 @@ body{
 }
 
 h1 {
+<<<<<<< HEAD
   @apply text-6xl font-bold mb-6 mt-6 text-center;
+=======
+  @apply text-6xl font-bold mb-6 mt-1 text-center;
+>>>>>>> origin/master
 }
 
 h2 {

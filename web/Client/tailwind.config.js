@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -9,4 +12,8 @@ export default {
     extend: {},
   },
   plugins: [],
+<<<<<<< HEAD
 } 
+=======
+} 
+>>>>>>> origin/master

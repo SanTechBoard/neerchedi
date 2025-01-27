@@ -87,7 +87,7 @@ function Dashboard({ isMinimized = false }) {
           <div className="grid grid-cols-1 gap-3">
             <div className={cardClass}>
               <h3 className={titleClass}>Current Epoch</h3>
-              <p className={`${valueClass} text-blue-600`}>{timeData.currentEpoch}</p>
+              <p className={`${valueClass} text-yellow-300`}>{timeData.currentEpoch}</p>
             </div>
             <div className={cardClass}>
               <h3 className={titleClass}>Last Updated Epoch</h3>

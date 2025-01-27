@@ -3,6 +3,14 @@
   src: url('../fonts/BruceForeverRegular-X3jd2.ttf') format('truetype');
 }
 
+.admin-menu {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2500;
+}
+
 .mini-dashboard {
   position: fixed;
   top: 10rem;
@@ -11,11 +19,12 @@
   height: 50vh;
   /* background-color: white; */
   border: 3px solid rgba(136, 136, 136, 0.11);
+  border-radius: 1rem;
   box-shadow: -2px 0 10px rgba(0,0,0,0.1);
   padding: 1.5rem;
   overflow-y: auto;
   z-index: 40;
-  transition: transform 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   /* font-family: 'Bruce Forever', sans-serif; */
 }
 
@@ -30,27 +39,65 @@
     scrollbar-width: none;  /* Firefox */
 }
 
-/* Add media query for mobile responsiveness */
-@media (max-width: 768px) {
+/* Updated media queries for better responsiveness */
+@media (max-width: 1200px) {
     .mini-dashboard {
-        width: 100%;
+        width: 60%;
+        height: 60vh;
     }
 }
 
-/* Add specific media query for width around 933px */
 @media (max-width: 1024px) {
     .mini-dashboard {
-        height: calc(100vh - 5rem); /* Ensure full height minus top spacing */
+        width: 70%;
+        height: calc(70vh - 5rem);
         max-height: calc(100vh - 5rem);
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        left: 3rem;
     }
 }
 
+@media (max-width: 768px) {
+    .mini-dashboard {
+        width: 80%;
+        height: calc(80vh - 5rem);
+        left: 2rem;
+        top: 8rem;
+    }
+}
+
+@media (max-width: 480px) {
+  .admin-menu {
+    right: 1rem;
+    z-index: 2500;
+  }
+
+  .admin-menu ul {
+    margin-right: 0;
+    gap: 2rem;
+  }
+
+  .admin-menu ul li a {
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 2500;
+  }
+
+  .mini-dashboard {
+    z-index: 40;
+    width: 90%;
+    left: 5%;
+    top: 6rem;
+  }
+}
+
+.admin-menu ul{
+  z-index: 1000;
+}
 
 .admin-menu ul li a{
     font-family: 'Bruce Forever', sans-serif;
     /* font-size: 5rem; */
+    
 }
 
 .admin-menu ul li a:hover{
@@ -150,4 +197,58 @@
   cursor: se-resize;
   z-index: 1003;
   background-color: #00ff6e1a;
+}
+
+.mobile-windows-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.mobile-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #13df6b;
+}
+
+.mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--header-bg);
+}
+
+.mobile-header button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  /* padding: 1rem; */
+  width: 44px;
+  height: 44px;
+}
+
+.mobile-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 481px) {
+  .mobile-windows-container {
+    display: none;
+  }
 }

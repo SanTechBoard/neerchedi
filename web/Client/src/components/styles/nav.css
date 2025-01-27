@@ -24,6 +24,10 @@ nav ul li:active{
     color: rgb(47, 255, 57);
     transition: transform 0.3s ease-in-out;
     transform: translateY(-200px) scale(20);
+<<<<<<< HEAD
+}
+=======
 }
 
 
+>>>>>>> origin/master

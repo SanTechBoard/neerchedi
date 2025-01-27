@@ -1,0 +1,23 @@
+[phases.setup]
+nixPkgs = [
+  "nodejs_18",
+  "npm-9_x"
+]
+
+[phases.install]
+cmds = ["npm ci --production=false"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+# Using a static file server instead of Vite preview
+nixPkgs = ["nodejs_18"]
+cmd = "npx serve -s dist -l $PORT"
+
+[variables]
+NODE_ENV = "production"
+PORT = "3000"
+HOST = "0.0.0.0"
+VITE_FBRTDBAPI = "${VITE_FBRTDBAPI}"
+VITE_FBRTDBURL = "${VITE_FBRTDBURL}"

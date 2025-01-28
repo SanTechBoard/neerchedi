@@ -1,13 +1,4 @@
 import { useTheme } from './themecontext';
-<<<<<<< HEAD
-
-export function ThemeToggle() {
-  const { isDark, toggleTheme } = useTheme();
-
-  return (
-    <button
-      className="fixed top-4 right-4 p-2 rounded-lg text-4xl"
-=======
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -47,15 +38,10 @@ export function ThemeToggle() {
   return (
     <button
       className="fixed top-4 right-4 p-2 rounded-lg text-4xl z-10"
->>>>>>> origin/master
       onClick={toggleTheme}
     >
       {isDark ? '☀️' : '🌙'}
     </button>
   );
-<<<<<<< HEAD
-}
-=======
 }
 
->>>>>>> origin/master

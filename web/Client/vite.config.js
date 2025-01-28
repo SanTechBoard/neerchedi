@@ -7,15 +7,12 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    strictPort: true
+    strictPort: true,
+    // allowedHosts: 'ycwogwccwcgk8s0k8s8gogg4.209.182.232.125.sslip.io'
   },
   preview: {
     host: '0.0.0.0',
     port: 3000,
     strictPort: true
   }
-<<<<<<< HEAD
 })
-=======
-})
->>>>>>> origin/master

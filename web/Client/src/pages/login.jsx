@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {  useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
 function Login() {
@@ -15,15 +15,15 @@ function Login() {
             try {
                 const response = await fetch('http://localhost:54321/login', {
                     method: 'POST',
+                    credentials: "include",
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
     
                 const data = await response.json();
-    
+                console.log('response:', data);
+                
                 if (response.ok) {
-                    localStorage.setItem('token', data.token); // Store the token
-                    console.log('Login successful:', 'data:'+ data.token)
                     navigate('/admin'); // Redirect to the protected route
                 } else {
                     alert(data.error);
@@ -33,6 +33,8 @@ function Login() {
                 alert('An error occurred. Please try again.');
             }
         };
+
+      
 
   return (
     <>

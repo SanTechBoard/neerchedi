@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
-// Import the CSS directly from node_modules
+import Draggable from 'react-draggable';
 import 'react-resizable/css/styles.css';
-import Dashboard from '../components/dashboard';
 import '../styles/admin.css';
+import Dashboard from '../components/dashboard';  // Import the Dashboard component   
+import { useNavigate } from 'react-router-dom';  
 
 function Admin() {
+
+  
+
   const getWindowDimensions = () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -180,6 +183,51 @@ function Admin() {
     }
   };
 
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:54321/auth", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.isAuthenticated) {
+          navigate("/login");
+        } else {
+          setIsAuthenticated(true);
+        }
+      });
+
+
+  // Destroy session when tab is closed
+  const handleTabClose = () => {
+    fetch("http://localhost:5000/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  };
+
+  window.addEventListener("beforeunload", handleTabClose);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleTabClose);
+  };
+}, [navigate]);
+
+
+
+  const logout = async () => {
+    await fetch("http://localhost:5000/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    navigate("/login");
+  };
+
+  if (!isAuthenticated) return null; // Prevent flashing of admin page while checking auth
+
+
   return (
     <div className="admin-container" ref={dragBounds}>
       <h1 className="text-3xl font-bold mb-6">Admin</h1>
@@ -227,10 +275,11 @@ function Admin() {
           </li>
           <li>
             <a 
-              href="/logout" 
+              href="/login" 
               className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
               onMouseMove={(e) => handleMouseMove(e, 'Logout')}
               onMouseLeave={handleMouseLeave}
+              onClick={logout}
             >L</a>
           </li>
         </ul>

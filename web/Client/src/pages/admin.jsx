@@ -184,7 +184,7 @@ function Admin() {
   };
 
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState();
 
   useEffect(() => {
     fetch("http://localhost:54321/auth", {

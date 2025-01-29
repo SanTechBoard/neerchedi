@@ -73,6 +73,7 @@ app.post("/logout", (req, res) => {
 
 // Authentication Check Route
 app.get("/auth", (req, res) => {
+    console.log('Session:', req.session);
     if (req.session.user) {
       res.json({ isAuthenticated: true });
     } else {

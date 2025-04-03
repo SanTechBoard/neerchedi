@@ -1,15 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
-// Import the CSS directly from node_modules
 import 'react-resizable/css/styles.css';
 import Dashboard from '../components/dashboard';
 import '../styles/admin.css';
+import Automation from '../components/automation';
+import Settings from '../components/settings';
+import { ThemeToggle } from '../components/themetoggle';
+import { useTheme } from '../components/themecontext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Admin() {
+  const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
   const getWindowDimensions = () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    // Update console logging
+    console.log('Window dimensions:', { width, height });
+    console.log('Current theme:', isDark ? 'dark' : 'light');
 
     if (width > 1200) {
       return {
@@ -105,13 +117,20 @@ function Admin() {
     setActiveWindow(component);
   };
 
+  const handleLogout = (e) => {
+    e.preventDefault();
+    logout();
+    localStorage.removeItem('isAdminLoggedIn'); // Explicitly remove admin login state
+    navigate('/login');
+  };
+
   const renderWindowContent = (title, content) => (
-    <div className="window-container">
-      <div className="window-header">
-        <h2>{title}</h2>
-        <button onClick={() => setActiveWindow(null)}>×</button>
+    <div className="window-container h-full w-full bg-white dark:bg-gray-800 transition-colors duration-200">
+      <div className="window-header bg-gray-100 dark:bg-gray-700 cursor-move transition-colors duration-200">
+        <h2 className="text-gray-900 dark:text-white">{title}</h2>
+        <button onClick={() => setActiveWindow(null)} className="text-gray-900 dark:text-white">×</button>
       </div>
-      <div className="window-content">
+      <div className="window-content text-gray-900 dark:text-white">
         {content}
       </div>
     </div>
@@ -156,7 +175,7 @@ function Admin() {
       >
         <div ref={nodeRef} style={{ position: 'absolute', height: 'auto' }}>
           <ResizableBox
-            className="component-window"
+            className="box component-window bg-white dark:bg-gray-800 transition-colors duration-200"
             width={windowDimensions.width}
             height={windowDimensions.height}
             minConstraints={[windowDimensions.minWidth, windowDimensions.minHeight]}
@@ -172,9 +191,9 @@ function Admin() {
   const renderWindow = () => {
     switch(activeWindow) {
       case 'automation':
-        return renderContent('Automation', <h3>Automation Content</h3>);
+        return renderContent('Automation', <Automation />);
       case 'settings':
-        return renderContent('Settings', <h3>Settings Content</h3>);
+        return renderContent('Settings', <Settings />);
       default:
         return null;
     }
@@ -208,6 +227,9 @@ function Admin() {
       <div className='fixed right-0 flex flex-start flex-row h-full top-0 admin-menu'>
         <ul className='flex flex-col text-center text-3xl gap-8 justify-center mr-9'>
           <li>
+            <ThemeToggle />
+          </li>
+          <li>
             <a 
               href="/automation" 
               className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
@@ -227,10 +249,11 @@ function Admin() {
           </li>
           <li>
             <a 
-              href="/logout" 
+              href="/logout"
               className="hover:text-blue-500 hover:scale-150 transition-all transform inline-block"
               onMouseMove={(e) => handleMouseMove(e, 'Logout')}
               onMouseLeave={handleMouseLeave}
+              onClick={handleLogout}
             >L</a>
           </li>
         </ul>

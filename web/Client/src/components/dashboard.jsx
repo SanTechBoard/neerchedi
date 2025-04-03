@@ -19,6 +19,8 @@ function Dashboard({ isMinimized = false }) {
     lastUpdatedEpoch: 0
   });
 
+  const [espStatus, setEspStatus] = useState('Online');
+
   useEffect(() => {
     const hydroRef = ref(database, 'hydroponics/');
     onValue(hydroRef, (snapshot) => {
@@ -37,6 +39,20 @@ function Dashboard({ isMinimized = false }) {
     });
   }, []);
 
+  useEffect(() => {
+    const checkEspStatus = () => {
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      const timeDiff = Math.abs(currentTime - timeData.currentEpoch);
+      setEspStatus(timeDiff > 300 ? 'ESP Not Alive' : 'Online');
+    };
+
+    // Check initially and set up interval
+    checkEspStatus();
+    const interval = setInterval(checkEspStatus, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [timeData.currentEpoch]);
+
   const cardClass = `${
     isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
   } p-4 rounded-lg shadow-lg transition-all duration-300`;
@@ -44,6 +60,23 @@ function Dashboard({ isMinimized = false }) {
   const titleClass = `font-semibold mb-2 ${isMinimized ? 'text-lg' : 'text-xl'}`;
   const valueClass = `font-bold ${isMinimized ? 'text-2xl' : 'text-4xl'}`;
   const sectionClass = `text-2xl font-semibold mb-4 ${isMinimized ? 'text-xl' : 'text-2xl'}`;
+
+  const formatDateTime = (epoch) => {
+    if (!epoch) return 'N/A';
+    const milliseconds = epoch * 1000;
+    const date = new Date(milliseconds);
+    return date.toLocaleString('en-IN', { 
+      timeZone: 'Asia/Kolkata',
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  };
 
   return (
     <div className={`p-4 ${isMinimized ? 'scale-95' : ''}`}>
@@ -86,12 +119,17 @@ function Dashboard({ isMinimized = false }) {
           <h2 className={sectionClass}>Time</h2>
           <div className="grid grid-cols-1 gap-3">
             <div className={cardClass}>
-              <h3 className={titleClass}>Current Epoch</h3>
-              <p className={`${valueClass} text-yellow-300`}>{timeData.currentEpoch}</p>
+              <h3 className={titleClass}>Current Time (IST)</h3>
+              <p className={`${valueClass} ${espStatus === 'Online' ? 'text-yellow-300' : 'text-red-600'}`}>
+                {espStatus === 'Online' 
+                  ? formatDateTime(timeData.currentEpoch)
+                  : 'ESP Not Alive'
+                }
+              </p>
             </div>
             <div className={cardClass}>
-              <h3 className={titleClass}>Last Updated Epoch</h3>
-              <p className={`${valueClass} text-orange-500`}>{timeData.lastUpdatedEpoch}</p>
+              <h3 className={titleClass}>Last Updated (IST)</h3>
+              <p className={`${valueClass} text-orange-500`}>{formatDateTime(timeData.lastUpdatedEpoch)}</p>
             </div>
           </div>
         </div>

@@ -10,21 +10,17 @@ export function ThemeProvider({ children }) {
   });
 
   useEffect(() => {
-    // Save theme preference to localStorage whenever it changes
     localStorage.setItem('theme', JSON.stringify(isDark));
     
-    // Apply theme classes separately
-    document.body.className = `root  ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`;
-    
-    // Apply theme-change class to a different element
-    const themeElement = document.querySelector('.theme-change');
-    if (themeElement) {
-      themeElement.className = `theme-change ${
-        isDark 
-          ? 'bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg' 
-          : 'bg-gray-300 text-black p-6 rounded-lg shadow-lg'
-      }`;
+    // Update the document class for dark mode
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
+    
+    // Update body background and text color
+    document.body.className = `root ${isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`;
   }, [isDark]);
 
   const toggleTheme = () => {

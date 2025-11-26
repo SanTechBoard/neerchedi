@@ -20,6 +20,7 @@ int bloom_time;
 int nutes_time;
 int greens_time;
 int phsensorval;
+bool activate = false;
 int nutridaydiff = 1;
 float volts;
 float ph;
@@ -68,12 +69,6 @@ class DateUpdater {
 
     void checkAndUpdateDate(unsigned long currentEpoch) {
       daysDifference = (currentEpoch - lastUpdatedEpoch) / 86400;
-      // Serial.print("$$$$$$daysDifference: ");
-      // Serial.println(daysDifference);
-      // Serial.print("$$$$$$currentEpoch: ");
-      // Serial.println(currentEpoch);
-      // Serial.print("$$$$$$lastUpdatedEpoch: ");
-      // Serial.println(lastUpdatedEpoch);
       if (daysDifference >= intervalDays) {
         unsigned long oldEpoch = lastUpdatedEpoch;
         lastUpdatedEpoch = currentEpoch;
@@ -131,11 +126,11 @@ class DateUpdater {
       return daysDifference;
     }
 
-    unsigned long getlastUpdatedEpoch(){
+    unsigned long getLastUpdatedEpoch() {
       return lastUpdatedEpoch;
     }
 
-     void setLastUpdatedEpoch(unsigned long epoch) {
+    void setLastUpdatedEpoch(unsigned long epoch) {
       lastUpdatedEpoch = epoch;  
     }
 };
@@ -172,9 +167,9 @@ void setup() {
   timeClient.begin();
   timeClient.update();
   
-  
+  currentEpoch = timeClient.getEpochTime();  // Get the current epoch time from NTP
   if (lastUpdatedEpoch == 0) {
-    lastUpdatedEpoch = currentEpoch;
+    lastUpdatedEpoch = currentEpoch; // Set it initially when it's 0
     Serial.println("First time update - setting the last updated date.");
   }
 
@@ -227,7 +222,7 @@ void nutrient(int bloom_time, int nutes_time, int greens_time) {
   daydiff1.checkAndUpdateDate(currentEpoch);
   unsigned long daysDifference = daydiff1.getDaysDifference();
   
-  if(daysDifference >= nutridaydiff) {
+  if (daysDifference >= nutridaydiff) {
     digitalWrite(bloom, HIGH);
     delay(bloom_time);
     digitalWrite(bloom, LOW);
@@ -242,19 +237,16 @@ void nutrient(int bloom_time, int nutes_time, int greens_time) {
 }
 
 void sendDataToFirebase() {
-  if(Firebase.ready()){
-    if(Firebase.setInt(fbdo, "/hydroponics/bloom_time", bloom_time) && 
-      Firebase.setInt(fbdo, "/hydroponics/nutes_time", nutes_time) && 
-      Firebase.setInt(fbdo, "/hydroponics/greens_time", greens_time) && 
-      Firebase.setFloat(fbdo, "/hydroponics/ph", ph) &&
-      Firebase.setString(fbdo, "/hydroponics/state", state) &&
-      Firebase.setInt(fbdo, "/hydroponics/time/nutrients/lastUpdatedEpoch", daydiff1.getlastUpdatedEpoch()) &&
-      Firebase.setInt(fbdo, "/hydroponics/time/nutrients/currentEpoch", currentEpoch))  
-    {
+  if (Firebase.ready()) {
+    if (Firebase.setInt(fbdo, "/hydroponics/bloom_time", bloom_time) &&
+        Firebase.setInt(fbdo, "/hydroponics/nutes_time", nutes_time) &&
+        Firebase.setInt(fbdo, "/hydroponics/greens_time", greens_time) &&
+        Firebase.setFloat(fbdo, "/hydroponics/ph", ph) &&
+        Firebase.setString(fbdo, "/hydroponics/state", state) &&
+        Firebase.setInt(fbdo, "/hydroponics/time/nutrients/lastUpdatedEpoch", daydiff1.getLastUpdatedEpoch()) &&
+        Firebase.setInt(fbdo, "/hydroponics/time/nutrients/currentEpoch", currentEpoch)) {
       Serial.println("Data sent to Firebase successfully");
-    } 
-    else 
-    {
+    } else {
       Serial.println("Failed to send data to Firebase");
       Serial.println("Reason: " + fbdo.errorReason());
     }
@@ -262,53 +254,51 @@ void sendDataToFirebase() {
   delay(500);
 }
 
-void receiveDataFromFirebase() { 
-    if(Firebase.getInt(fbdo, "/hydroponics/bloom_time")) {
-      if(fbdo.dataType() == "int") {
-        bloom_time = fbdo.intData();
-        Serial.print("Received bloom_time: ");
-        Serial.println(bloom_time);
-      }
+void receiveDataFromFirebase() {
+  if (Firebase.getInt(fbdo, "/hydroponics/bloom_time")) {
+    if (fbdo.dataType() == "int") {
+      bloom_time = fbdo.intData();
+      Serial.print("Received bloom_time: ");
+      Serial.println(bloom_time);
     }
+  }
 
-    if(Firebase.getInt(fbdo, "/hydroponics/nutes_time")) {
-      if(fbdo.dataType() == "int") {
-        nutes_time = fbdo.intData();
-        Serial.print("Received nutes_time: ");
-        Serial.println(nutes_time);
-      }
+  if (Firebase.getInt(fbdo, "/hydroponics/nutes_time")) {
+    if (fbdo.dataType() == "int") {
+      nutes_time = fbdo.intData();
+      Serial.print("Received nutes_time: ");
+      Serial.println(nutes_time);
     }
+  }
 
-    if(Firebase.getInt(fbdo, "/hydroponics/greens_time")) {
-      if(fbdo.dataType() == "int") {
-        greens_time = fbdo.intData();
-        Serial.print("Received greens_time: ");
-        Serial.println(greens_time);
-      }
+  if (Firebase.getInt(fbdo, "/hydroponics/greens_time")) {
+    if (fbdo.dataType() == "int") {
+      greens_time = fbdo.intData();
+      Serial.print("Received greens_time: ");
+      Serial.println(greens_time);
     }
+  }
 
-    
-    if(Firebase.getInt(fbdo, "/hydroponics/time/nutrients/lastUpdatedEpoch")) {
-      if(fbdo.dataType() == "int") {
-        lastUpdatedEpoch = fbdo.intData();
-        daydiff1.setLastUpdatedEpoch(lastUpdatedEpoch);
-        Serial.print("Received lastUpdatedEpoch: ");
-        Serial.println(lastUpdatedEpoch);
-      }
+  if (Firebase.getInt(fbdo, "/hydroponics/time/nutrients/lastUpdatedEpoch")) {
+    if (fbdo.dataType() == "int") {
+      lastUpdatedEpoch = fbdo.intData();
+      daydiff1.setLastUpdatedEpoch(lastUpdatedEpoch);
+      Serial.print("Received lastUpdatedEpoch: ");
+      Serial.println(lastUpdatedEpoch);
     }
+  }
 }
 
-void updating_check(){
+void updating_check() {
   String updating = "false";
-  if(Firebase.getString(fbdo, "/hydroponics/updating")){
-    if(fbdo.dataType() == "string"){
+  if (Firebase.getString(fbdo, "/hydroponics/updating")) {
+    if (fbdo.dataType() == "string") {
       updating = fbdo.stringData();
-      if(updating == "true"){
+      if (updating == "true") {
         delay(100);
-        Serial.println("Updating values");     
-      }      
-      else if(updating == "false"){
-        sendDataToFirebase();    
+        Serial.println("Updating values");
+      } else if (updating == "false") {
+        sendDataToFirebase();
       }
     }
   }
@@ -316,34 +306,62 @@ void updating_check(){
 
 void manageState() {
   if (state == "off") {
-    delay(1000);  
+    delay(1000);
     return;
-  } 
-  else {
+  } else {
     timeClient.update();
     phmanage();
     updating_check();
+    sendDataToFirebase();
+    activate = false;
   }
 }
 
+void sendDataToArduino() {
+  Serial.print("bloom_time:");
+  Serial.print(bloom_time);
+  Serial.print(",");
+  Serial.print("greens_time:");
+  Serial.print(greens_time);
+  Serial.print(",");
+  Serial.print("nutes_time:");
+  Serial.print(nutes_time);
+  Serial.print(",");
+  Serial.print("ph:");
+  Serial.print(ph, 1);  // send the pH value with 1 decimal place
+  Serial.print(",");
+  Serial.print("state:");
+  Serial.println(state);
+  Serial.print(",");
+  Serial.print("activate:");
+  Serial.println(activate);
+  bloom_time = 0;
+  greens_time = 0;
+  nutes_time = 0;
+  sendDataToFirebase();
+}
+
 void loop() {
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("WiFi connection lost!");
-        delay(1000);
-        ESP.restart();
-        return;
-    }
-    
-    if (!signupOK || !Firebase.ready()) {
-        Serial.println("Firebase not ready!");
-        delay(1000);
-        return; 
-    }
-    receiveDataFromFirebase();  
-    delay(100);
-    currentEpoch = timeClient.getEpochTime();
-    daydiff1.printOldAndNewDates(lastUpdatedEpoch, currentEpoch);
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi connection lost!");
     delay(1000);
-    daydiff1.checkAndUpdateDate(currentEpoch);
-    manageState();
+    ESP.restart();
+    return;
+  }
+
+  if (!signupOK || !Firebase.ready()) {
+    Serial.println("Firebase not ready!");
+    delay(1000);
+    return;
+  }
+  
+  receiveDataFromFirebase();
+  delay(100);
+  
+  currentEpoch = timeClient.getEpochTime();
+  daydiff1.checkAndUpdateDate(currentEpoch);  // Update the date
+
+  delay(1000);
+  daydiff1.printOldAndNewDates(lastUpdatedEpoch, currentEpoch);
+  manageState();
 }

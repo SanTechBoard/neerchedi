@@ -13,14 +13,19 @@ bool manualInlet = false;
 bool manualOutlet = false;
 
 // Pin definitions
-#define bloom 4
-#define nutes 5
-#define greens 18
-#define inlet 13
-#define outlet 12
+#define bloom 2
+#define nutes 3
+#define greens 4
+#define inlet 5
+#define outlet 10
+#define acid 6
+#define base 8
+
+#include <avr/wdt.h>
 
 void setup() {
   Serial.begin(115200);  // Initialize serial communication at 115200 baud rate
+  wdt_enable(WDTO_2S);
   
   // Set pins as output
   pinMode(bloom, OUTPUT);
@@ -28,92 +33,85 @@ void setup() {
   pinMode(greens, OUTPUT);
   pinMode(inlet, OUTPUT);
   pinMode(outlet, OUTPUT);
+  pinMode(acid, OUTPUT);
+  pinMode(base, OUTPUT);
+  digitalWrite(bloom,HIGH);
+  digitalWrite(nutes,HIGH);
+  digitalWrite(greens,HIGH);
+  digitalWrite(inlet,HIGH);
+  digitalWrite(outlet,LOW);
+}
+
+void handleManualControls(String message) {
+  // Remove the "M:" prefix
+  message = message.substring(2);
+  
+  // Split the message into control states
+  int firstComma = message.indexOf(',');
+  int secondComma = message.indexOf(',', firstComma + 1);
+  int thirdComma = message.indexOf(',', secondComma + 1);
+  int fourthComma = message.indexOf(',', thirdComma + 1);
+  
+  // Extract and apply each control state
+  manualGreens = message.substring(0, firstComma) == "1";
+  manualNutes = message.substring(firstComma + 1, secondComma) == "1";
+  manualBlooms = message.substring(secondComma + 1, thirdComma) == "1";
+  manualInlet = message.substring(thirdComma + 1, fourthComma) == "1";
+  manualOutlet = message.substring(fourthComma + 1) == "1";
+  
+  // Apply the control states to the pins
+  digitalWrite(greens, manualGreens ? LOW : HIGH);
+  digitalWrite(nutes, manualNutes ? LOW : HIGH);
+  digitalWrite(bloom, manualBlooms ? LOW : HIGH);
+  digitalWrite(inlet, manualInlet ? LOW : HIGH);
+  digitalWrite(outlet, manualOutlet ? LOW : HIGH);
+}
+
+void handleTimingData(String message) {
+  // Remove the "T:" prefix
+  message = message.substring(2);
+  
+  // Split the message into components
+  int firstComma = message.indexOf(',');
+  int secondComma = message.indexOf(',', firstComma + 1);
+  int thirdComma = message.indexOf(',', secondComma + 1);
+  int fourthComma = message.indexOf(',', thirdComma + 1);
+  int fifthComma = message.indexOf(',', fourthComma + 1);
+  
+  // Extract timing values
+  bloom_time = message.substring(0, firstComma).toInt();
+  greens_time = message.substring(firstComma + 1, secondComma).toInt();
+  nutes_time = message.substring(secondComma + 1, thirdComma).toInt();
+  ph = message.substring(thirdComma + 1, fourthComma).toFloat();
+  state = message.substring(fourthComma + 1, fifthComma);
+  activate = message.substring(fifthComma + 1) == "1";
+
+  // Debug print
+  Serial.println(F("Received timing data:"));
+  Serial.println("Bloom time: " + String(bloom_time));
+  Serial.println("Greens time: " + String(greens_time));
+  Serial.println("Nutes time: " + String(nutes_time));
+  Serial.println("pH: " + String(ph));
+  Serial.println("State: " + state);
+  Serial.println("Activate: " + String(activate));
 }
 
 void loop() {
+  wdt_reset();
   // Check if data is available to read
   if (Serial.available()) {
-    String incomingData = Serial.readStringUntil('\n'); // Read the incoming data until newline
-
+    String incomingData = Serial.readStringUntil('\n');
+    
     // Print the received data for debugging
-    Serial.print("Received Data: ");
+    Serial.print(F("Received Data: "));
     Serial.println(incomingData);
 
-    // Parse manual control states
-    if (incomingData.indexOf("manual_greens:") >= 0) {
-      int startIndex = incomingData.indexOf("manual_greens:") + 14;
-      String value = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      manualGreens = (value == "1");
-      digitalWrite(greens, manualGreens ? HIGH : LOW);
+    // Check message type and handle accordingly
+    if (incomingData.startsWith("M:")) {
+      handleManualControls(incomingData);
     }
-
-    if (incomingData.indexOf("manual_nutes:") >= 0) {
-      int startIndex = incomingData.indexOf("manual_nutes:") + 13;
-      String value = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      manualNutes = (value == "1");
-      digitalWrite(nutes, manualNutes ? HIGH : LOW);
-    }
-
-    if (incomingData.indexOf("manual_blooms:") >= 0) {
-      int startIndex = incomingData.indexOf("manual_blooms:") + 14;
-      String value = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      manualBlooms = (value == "1");
-      digitalWrite(bloom, manualBlooms ? HIGH : LOW);
-    }
-
-    if (incomingData.indexOf("manual_inlet:") >= 0) {
-      int startIndex = incomingData.indexOf("manual_inlet:") + 13;
-      String value = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      manualInlet = (value == "1");
-      digitalWrite(inlet, manualInlet ? HIGH : LOW);
-    }
-
-    if (incomingData.indexOf("manual_outlet:") >= 0) {
-      int startIndex = incomingData.indexOf("manual_outlet:") + 14;
-      String value = incomingData.substring(startIndex);
-      manualOutlet = (value == "1");
-      digitalWrite(outlet, manualOutlet ? HIGH : LOW);
-    }
-
-    // Parse other existing values
-    if (incomingData.indexOf("bloom_time:") >= 0) {
-      int startIndex = incomingData.indexOf("bloom_time:") + 11;
-      String bloomTimeValue = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      bloom_time = bloomTimeValue.toInt();
-      Serial.print("Received bloom_time: ");
-      Serial.println(bloom_time);
-    }
-
-    if (incomingData.indexOf("nutes_time:") >= 0) {
-      int startIndex = incomingData.indexOf("nutes_time:") + 11;
-      String nutesTimeValue = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      nutes_time = nutesTimeValue.toInt();
-      Serial.print("Received nutes_time: ");
-      Serial.println(nutes_time);
-    }
-
-    if (incomingData.indexOf("greens_time:") >= 0) {
-      int startIndex = incomingData.indexOf("greens_time:") + 12;
-      String greensTimeValue = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      greens_time = greensTimeValue.toInt();
-      Serial.print("Received greens_time: ");
-      Serial.println(greens_time);
-    }
-
-    if (incomingData.indexOf("ph:") >= 0) {
-      int startIndex = incomingData.indexOf("ph:") + 3;
-      String phValue = incomingData.substring(startIndex, incomingData.indexOf(",", startIndex));
-      ph = phValue.toFloat();
-      Serial.print("Received pH: ");
-      Serial.println(ph);
-    }
-
-    if (incomingData.indexOf("state:") >= 0) {
-      int startIndex = incomingData.indexOf("state:") + 6;
-      String stateValue = incomingData.substring(startIndex);
-      state = stateValue;
-      Serial.print("Received state: ");
-      Serial.println(state);
+    else if (incomingData.startsWith("T:")) {
+      handleTimingData(incomingData);
     }
   }
 
@@ -131,5 +129,5 @@ void loop() {
   }
   
   activate = false;
-  delay(100);  
+  delay(1000);
 }

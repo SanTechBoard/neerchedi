@@ -239,6 +239,7 @@ void nutrient(int bloom_time, int nutes_time, int greens_time) {
     digitalWrite(greens, HIGH);
     delay(greens_time);
     digitalWrite(greens, LOW);
+    phmanage();
   }
   delay(500);
 }
@@ -371,7 +372,6 @@ void manageState() {
     return;
   } else {
     timeClient.update();
-    phmanage();
     updating_check();
     sendDataToFirebase();
     sendDataToArduino();
